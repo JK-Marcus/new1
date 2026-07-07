@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的简易网页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        body {
+            background-color: #f0f8ff;
+            text-align: center;
+            padding: 50px;
+        }
+        .box {
+            width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px #ccc;
+        }
+        h1 {
+            color: #2266cc;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 18px;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+        button {
+            padding: 12px 30px;
+            background: #2266cc;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1852aa;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>欢迎来到我的网页</h1>
+        <p>这是一套完整独立网页代码，包含HTML结构、CSS样式、简单JavaScript交互</p>
+        <p>把全部代码复制，新建文本文档粘贴，后缀改为 .html 双击即可浏览器打开</p>
+        <button id="btn">点击弹出提示</button>
+    </div>
+
+    <script>
+        // 简单交互JS
+        const btn = document.getElementById('btn');
+        btn.onclick = function() {
+            alert('你成功点击按钮啦！网页运行正常');
+        }
+    </script>
+</body>
+</html>
