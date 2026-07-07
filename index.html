@@ -2,66 +2,46 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的简易网页</title>
+    <title>首页</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "Microsoft Yahei", sans-serif;
         }
         body {
-            background-color: #f0f8ff;
-            text-align: center;
-            padding: 50px;
+            /* 页面垂直+水平居中全部内容 */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #f5f5f5;
         }
-        .box {
-            width: 600px;
-            margin: 0 auto;
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 4px 15px #ccc;
-        }
-        h1 {
-            color: #2266cc;
+        /* 图片样式 */
+        #img110 {
+            width: 320px;
             margin-bottom: 20px;
         }
-        p {
+        /* 底部文字样式 */
+        .text-tip {
+            font-size: 24px;
+            color: #222222;
+        }
+        /* 跳转游戏链接 */
+        .game-link {
+            margin-top: 30px;
             font-size: 18px;
-            color: #555;
-            line-height: 1.8;
-            margin-bottom: 25px;
-        }
-        button {
-            padding: 12px 30px;
-            background: #2266cc;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #1852aa;
+            color: #0066cc;
         }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h1>欢迎来到我的网页</h1>
-        <p>这是一套完整独立网页代码，包含HTML结构、CSS样式、简单JavaScript交互</p>
-        <p>把全部代码复制，新建文本文档粘贴，后缀改为 .html 双击即可浏览器打开</p>
-        <button id="btn">点击弹出提示</button>
-    </div>
+    <!-- 根目录的110.png图片 -->
+    <img id="img110" src="110.png" alt="配图">
+    <div class="text-tip">老爹，我真的在学东西</div>
 
-    <script>
-        // 简单交互JS
-        const btn = document.getElementById('btn');
-        btn.onclick = function() {
-            alert('你成功点击按钮啦！网页运行正常');
-        }
-    </script>
+    <!-- 跳转小恐龙游戏页面 -->
+    <a class="game-link" href="dion.html">点我打开小恐龙小游戏</a>
 </body>
 </html>
