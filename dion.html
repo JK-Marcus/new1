@@ -2,181 +2,226 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>小恐龙跑酷游戏</title>
+    <title>纯绘制小恐龙跑酷</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: Arial, sans-serif;
+            font-family: system-ui, sans-serif;
         }
         body {
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: #f7f7f7;
-            padding-top: 20px;
+            background: #f8f8f8;
+            padding-top: 24px;
         }
-        #gameBox {
-            border: 2px solid #333;
-            background: #fff;
-            overflow: hidden;
+        canvas {
+            border: 2px solid #222;
+            background: #ffffff;
         }
-        #scoreText {
-            font-size: 28px;
-            margin-bottom: 10px;
+        .score {
+            font-size: 30px;
             font-weight: bold;
+            margin-bottom: 12px;
         }
-        #tip {
+        .tip {
+            margin-top: 12px;
+            color: #555;
+        }
+        a {
             margin-top: 10px;
-            color: #666;
+            color: #0066cc;
         }
     </style>
 </head>
 <body>
-    <div id="scoreText">分数：0</div>
-    <canvas id="gameBox" width="800" height="200"></canvas>
-    <div id="tip">操作：空格 / 上箭头 = 跳跃 | 下箭头 = 下蹲</div>
-    <a href="./" style="margin-top:10px;">返回首页</a>
+    <div class="score">分数：0</div>
+    <canvas id="gameCanvas" width="800" height="200"></canvas>
+    <div class="tip">空格/上箭头跳跃 | 下箭头下蹲 | 游戏结束按空格重开</div>
+    <a href="./">返回首页</a>
 
     <script>
-        const canvas = document.getElementById('gameBox');
+        const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const scoreText = document.getElementById('scoreText');
+        const scoreDom = document.querySelector('.score');
 
-        // 资源：使用在线恐龙透明素材，无需本地图片
-        const dinoImg = new Image();
-        dinoImg.src = "https://i.imgur.com/5F8Z7Lw.png"; // 站立恐龙
-        const dinoDuckImg = new Image();
-        dinoDuckImg.src = "https://i.imgur.com/QnXzY0A.png"; // 下蹲恐龙
-        const cactusImg = new Image();
-        cactusImg.src = "https://i.imgur.com/9gVjX7Y.png"; // 仙人掌
-
+        // 游戏基础数据
         let score = 0;
         let speed = 6;
         let gameOver = false;
+        const groundY = 180;
 
+        // 恐龙参数
         const dino = {
-            x: 50,
-            y: 150,
-            width: 44,
-            height: 47,
-            velocityY: 0,
+            x: 40,
+            y: groundY - 42,
+            width: 40,
+            height: 42,
+            vy: 0,
             gravity: 0.6,
             jumpPower: -14,
-            isDuck: false
+            duck: false
         };
-        const ground = { y: 180 };
+
         let cactusList = [];
         let cloudList = [];
 
-        document.addEventListener('keydown', (e) => {
-            if(gameOver) restartGame();
-            if((e.code === 'Space' || e.code === 'ArrowUp') && dino.y >= ground.y - dino.height){
-                dino.velocityY = dino.jumpPower;
+        // 键盘监听
+        document.addEventListener('keydown', e => {
+            if (gameOver) restart();
+            if ((e.code === 'Space' || e.code === 'ArrowUp') && dino.y >= groundY - dino.height) {
+                dino.vy = dino.jumpPower;
             }
-            if(e.code === 'ArrowDown') dino.isDuck = true;
+            if (e.code === 'ArrowDown') dino.duck = true;
         })
-        document.addEventListener('keyup', (e) => {
-            if(e.code === 'ArrowDown') dino.isDuck = false;
+        document.addEventListener('keyup', e => {
+            if (e.code === 'ArrowDown') dino.duck = false;
         })
 
-        function createCactus(){
-            const width = 30;
-            cactusList.push({
-                x: canvas.width,
-                y: ground.y - width - 10,
-                w: width,
-                h: width + 10
-            })
-        }
-        function createCloud(){
-            cloudList.push({
-                x: canvas.width,
-                y: 20 + Math.random()*60,
-                w: 40 + Math.random()*30,
-                h: 20
-            })
-        }
-        function isHit(rect1, rect2){
-            return rect1.x < rect2.x + rect2.w &&
-                   rect1.x + rect1.width > rect2.x &&
-                   rect1.y < rect2.y + rect2.h &&
-                   rect1.y + rect1.height > rect2.y;
-        }
-        function restartGame(){
+        // 重置游戏
+        function restart() {
             score = 0;
             speed = 6;
             gameOver = false;
-            dino.y = 150;
-            dino.velocityY = 0;
+            dino.y = groundY - dino.height;
+            dino.vy = 0;
             cactusList = [];
             cloudList = [];
-            scoreText.innerText = `分数：${score}`;
+            scoreDom.innerText = `分数：${score}`;
         }
 
-        function gameLoop(){
-            if(gameOver){
-                ctx.fillStyle = '#333';
-                ctx.font = '36px Arial';
+        // 绘制恐龙（纯代码图形，无外部图片）
+        function drawDino() {
+            ctx.fillStyle = '#333333';
+            let h = dino.duck ? 22 : dino.height;
+            let yPos = dino.duck ? groundY - h : dino.y;
+            // 身体主体
+            ctx.fillRect(dino.x + 8, yPos + 8, dino.width - 12, h - 10);
+            // 恐龙头部
+            ctx.beginPath();
+            ctx.arc(dino.x + 32, yPos + 10, 10, 0, Math.PI * 2);
+            ctx.fill();
+            // 恐龙腿
+            if (!dino.duck) {
+                ctx.fillRect(dino.x + 10, yPos + h - 6, 6, 8);
+                ctx.fillRect(dino.x + 24, yPos + h - 6, 6, 8);
+            }
+            // 尾巴
+            ctx.fillRect(dino.x, yPos + 14, 10, 6);
+        }
+
+        // 绘制仙人掌
+        function drawCactus(item) {
+            ctx.fillStyle = '#2d7030';
+            ctx.fillRect(item.x + item.w * 0.3, item.y, item.w * 0.4, item.h);
+            ctx.fillRect(item.x, item.y + item.h * 0.2, item.w * 0.35, item.h * 0.4);
+            ctx.fillRect(item.x + item.w * 0.65, item.y + item.h * 0.35, item.w * 0.35, item.h * 0.45);
+        }
+
+        // 生成仙人掌
+        function addCactus() {
+            const w = 18 + Math.random() * 22;
+            cactusList.push({
+                x: canvas.width,
+                y: groundY - w - 12,
+                w: w,
+                h: w + 12
+            })
+        }
+
+        // 绘制云朵
+        function drawCloud(item) {
+            ctx.fillStyle = '#bbbbbb';
+            ctx.beginPath();
+            ctx.arc(item.x, item.y, 12, 0, Math.PI * 2);
+            ctx.arc(item.x + 16, item.y - 6, 16, 0, Math.PI * 2);
+            ctx.arc(item.x + 32, item.y, 12, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 生成云朵
+        function addCloud() {
+            cloudList.push({
+                x: canvas.width,
+                y: 25 + Math.random() * 60,
+                speed: speed * 0.35
+            })
+        }
+
+        // 碰撞检测
+        function hitTest(a, b) {
+            return a.x < b.x + b.w &&
+                   a.x + a.width > b.x &&
+                   a.y < b.y + b.h &&
+                   a.y + a.height > b.y;
+        }
+
+        // 主循环
+        function loop() {
+            if (gameOver) {
+                ctx.fillStyle = '#222';
+                ctx.font = '36px sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('游戏结束！按空格重新开始', canvas.width/2, canvas.height/2);
-                requestAnimationFrame(gameLoop);
+                ctx.fillText('游戏结束！按空格重新开始', canvas.width / 2, canvas.height / 2);
+                requestAnimationFrame(loop);
                 return;
             }
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            // 绘制地面
-            ctx.fillStyle = '#333';
-            ctx.fillRect(0, ground.y, canvas.width, 2);
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // 地面线
+            ctx.fillStyle = '#222';
+            ctx.fillRect(0, groundY, canvas.width, 3);
 
-            // 恐龙重力
-            dino.velocityY += dino.gravity;
-            dino.y += dino.velocityY;
-            if(dino.y > ground.y - dino.height){
-                dino.y = ground.y - dino.height;
-                dino.velocityY = 0;
+            // 恐龙重力下落
+            dino.vy += dino.gravity;
+            dino.y += dino.vy;
+            if (dino.y > groundY - dino.height) {
+                dino.y = groundY - dino.height;
+                dino.vy = 0;
             }
 
-            // 绘制恐龙图片
-            let drawImg = dino.isDuck ? dinoDuckImg : dinoImg;
-            let drawH = dino.isDuck ? 26 : dino.height;
-            let drawY = dino.isDuck ? ground.y - drawH : dino.y;
-            ctx.drawImage(drawImg, dino.x, drawY, dino.width, drawH);
+            // 绘制恐龙
+            drawDino();
 
-            // 生成障碍物
-            if(Math.random() < 0.008) createCactus();
-            if(Math.random() < 0.015) createCloud();
+            // 随机生成障碍物/云朵
+            if (Math.random() < 0.008) addCactus();
+            if (Math.random() < 0.012) addCloud();
 
-            // 仙人掌
-            for(let i = cactusList.length - 1; i >= 0; i--){
+            // 更新仙人掌
+            for (let i = cactusList.length - 1; i >= 0; i--) {
                 const c = cactusList[i];
                 c.x -= speed;
-                ctx.drawImage(cactusImg, c.x, c.y, c.w, c.h);
-                const dinoBox = {
+                drawCactus(c);
+                // 碰撞判定
+                let dinoBox = {
                     x: dino.x,
-                    y: drawY,
+                    y: dino.duck ? groundY - 22 : dino.y,
                     width: dino.width,
-                    height: drawH
+                    height: dino.duck ? 22 : dino.height
                 }
-                if(isHit(dinoBox, c)) gameOver = true;
-                if(c.x + c.w < 0) cactusList.splice(i,1);
+                if (hitTest(dinoBox, c)) gameOver = true;
+                if (c.x + c.w < 0) cactusList.splice(i, 1);
             }
 
-            // 云朵
-            ctx.fillStyle = '#aaa';
-            for(let i = cloudList.length - 1; i >= 0; i--){
+            // 更新云朵
+            for (let i = cloudList.length - 1; i >= 0; i--) {
                 const cl = cloudList[i];
-                cl.x -= speed * 0.4;
-                ctx.fillRect(cl.x, cl.y, cl.w, cl.h);
-                if(cl.x + cl.w < 0) cloudList.splice(i,1);
+                cl.x -= cl.speed;
+                drawCloud(cl);
+                if (cl.x > canvas.width + 50) cloudList.splice(i, 1);
             }
 
+            // 计分、提速
             score++;
-            if(score % 100 === 0) speed += 0.2;
-            scoreText.innerText = `分数：${Math.floor(score / 10)}`;
-            requestAnimationFrame(gameLoop);
+            if (score % 100 === 0) speed += 0.2;
+            scoreDom.innerText = `分数：${Math.floor(score / 10)}`;
+
+            requestAnimationFrame(loop);
         }
-        gameLoop();
+
+        loop();
     </script>
 </body>
 </html>
